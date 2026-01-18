@@ -1,70 +1,93 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useNavigate, useParams, useRouterState } from "@tanstack/react-router";
-import { Code, Eye } from "lucide-react";
-import { useEffect, useState } from "react";
-import { toast } from "react-hot-toast";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useNavigate, useParams, useRouterState } from '@tanstack/react-router';
+import { Code, Eye } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import dayjs from 'dayjs';
 
-import CopyButton from "../components/copy-button";
-import Editor from "../components/editor";
-import MdRenderer from "../components/md-renderer";
-import { getPaste, updatePaste } from "../service";
+import CopyButton from '../components/copy-button';
+import Editor from '../components/editor';
+import MdRenderer from '../components/md-renderer';
+import { updatePaste } from '../service';
 
-export default function Detail() {
-  const [content, setContent] = useState("");
-  const [pasteData, setPasteData] = useState<any>();
-  const [language, setLanguage] = useState("text");
-  const [isAuth, setIsAuth] = useState(true);
-  const [sharePassword, setSharePassword] = useState<string>("");
-  const [editPassword, setEditPassword] = useState<string>("");
-  const [viewMode, setViewMode] = useState<"preview" | "source">("preview");
-  const [origin, setOrigin] = useState("");
+export type DetailLoaderData = {
+  paste?: any;
+  error?: string;
+  code?: number;
+  sharePassword?: string | null;
+  editPassword?: string | null;
+  origin?: string;
+};
+
+export default function Detail({
+  loaderData,
+}: {
+  loaderData: DetailLoaderData;
+}) {
+  const initialPaste = loaderData?.paste;
+  const initialIsAuth =
+    loaderData?.code === 403 && !loaderData?.sharePassword ? false : true;
+
+  const [content, setContent] = useState(initialPaste?.content || '');
+  const [pasteData, setPasteData] = useState<any>(initialPaste);
+  const [language, setLanguage] = useState(initialPaste?.language || 'text');
+  const [isAuth, setIsAuth] = useState(initialIsAuth);
+  const [sharePassword, setSharePassword] = useState<string>(
+    loaderData?.sharePassword || '',
+  );
+  const [editPassword, setEditPassword] = useState<string>(
+    loaderData?.editPassword || '',
+  );
+  const [viewMode, setViewMode] = useState<'preview' | 'source'>('preview');
+  const [origin, setOrigin] = useState(loaderData?.origin || '');
 
   const navigate = useNavigate();
-  const { id } = useParams({ from: "/detail/$id" });
+  const { id } = useParams({ from: '/detail/$id' });
   const locationState = useRouterState({
     select: (state) =>
       state.location.state as { edit_password?: string } | undefined,
   });
 
   useEffect(() => {
-    if (!id || typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
-    const urlSharePassword = params.get("share_password");
-    getPaste(id, urlSharePassword).then((data: any) => {
-      if (data.error) {
-        if (data.code === 403) {
-          if (!urlSharePassword) {
-            setIsAuth(false);
-          } else {
-            toast.error("Password incorrect or content not found");
-          }
-          return;
-        }
-        toast.error(data.error);
-        return;
-      }
-      setPasteData(data);
-      setContent(data.content);
-      setLanguage(data.language);
-    });
+    if (!loaderData) return;
+    if (loaderData.paste && !loaderData.paste.error) {
+      setPasteData(loaderData.paste);
+      setContent(loaderData.paste.content || '');
+      setLanguage(loaderData.paste.language || 'text');
+      setIsAuth(true);
+    }
+    if (loaderData.code === 403 && !loaderData.sharePassword) {
+      setIsAuth(false);
+    }
+    if (loaderData.editPassword) {
+      setEditPassword(loaderData.editPassword);
+    }
+    if (loaderData.origin) {
+      setOrigin(loaderData.origin);
+    }
+  }, [loaderData]);
+
+  useEffect(() => {
     if (locationState?.edit_password) {
       setEditPassword(locationState.edit_password);
     }
-    if (params.get("edit_password")) {
-      setEditPassword(params.get("edit_password") || "");
-    }
-  }, [id, locationState]);
+  }, [locationState]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    setOrigin(window.location.origin);
-  }, []);
+    if (typeof window === 'undefined') return;
+    if (!loaderData?.error) return;
+    if (loaderData.code === 403 && loaderData.sharePassword) {
+      toast.error('Password incorrect or content not found');
+      return;
+    }
+    toast.error(loaderData.error);
+  }, [loaderData?.error, loaderData?.code, loaderData?.sharePassword]);
 
   const handleSubmitPassword = async () => {
     if (!id) return;
     navigate({
-      to: "/detail/$id",
+      to: '/detail/$id',
       params: { id },
       search: { share_password: sharePassword },
       replace: true,
@@ -82,7 +105,7 @@ export default function Detail() {
       toast.error(data.error);
       return;
     }
-    toast.success("Updated");
+    toast.success('Updated');
   };
 
   if (!isAuth) {
@@ -130,7 +153,7 @@ export default function Detail() {
     );
   }
 
-  if (language === "markdown") {
+  if (language === 'markdown') {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-4 space-y-4">
@@ -160,15 +183,15 @@ export default function Detail() {
                     </h1>
                     <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                       <span>
-                        {new Date(
-                          pasteData?.create_time || Date.now(),
-                        ).toLocaleDateString()}
+                        {dayjs(pasteData?.create_time || Date.now()).format(
+                          'YYYY-MM-DD',
+                        )}
                       </span>
                       <span>•</span>
                       <span>
                         {pasteData?.share_password
-                          ? "🔒 Protected"
-                          : "🌐 Public"}
+                          ? '🔒 Protected'
+                          : '🌐 Public'}
                       </span>
                     </div>
                   </div>
@@ -181,8 +204,8 @@ export default function Detail() {
                   >
                     <span className="sm:hidden">URL</span>
                     <span className="hidden sm:inline">
-                      Copy URL{" "}
-                      {pasteData?.share_password && "(without password)"}
+                      Copy URL{' '}
+                      {pasteData?.share_password && '(without password)'}
                     </span>
                   </CopyButton>
                   {editPassword && (
@@ -207,7 +230,7 @@ export default function Detail() {
                         `${origin}/raw/${id}${
                           pasteData?.share_password
                             ? `?share_password=${pasteData?.share_password}`
-                            : ""
+                            : ''
                         }`,
                       )
                     }
@@ -238,22 +261,22 @@ export default function Detail() {
               </span>
               <div className="flex bg-white dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600 overflow-hidden">
                 <button
-                  onClick={() => setViewMode("preview")}
+                  onClick={() => setViewMode('preview')}
                   className={`px-2 py-1 text-xs font-medium transition-colors flex items-center gap-1 ${
-                    viewMode === "preview"
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
+                    viewMode === 'preview'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
                   }`}
                 >
                   <Eye className="h-3 w-3" />
                   Preview
                 </button>
                 <button
-                  onClick={() => setViewMode("source")}
+                  onClick={() => setViewMode('source')}
                   className={`px-2 py-1 text-xs font-medium transition-colors flex items-center gap-1 ${
-                    viewMode === "source"
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
+                    viewMode === 'source'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
                   }`}
                 >
                   <Code className="h-3 w-3" />
@@ -263,8 +286,8 @@ export default function Detail() {
             </div>
 
             {/* Content Area */}
-            <div className={viewMode === "preview" ? "p-4" : ""}>
-              {viewMode === "preview" ? (
+            <div className={viewMode === 'preview' ? 'p-4' : ''}>
+              {viewMode === 'preview' ? (
                 <MdRenderer content={content} />
               ) : (
                 <Editor
@@ -272,7 +295,7 @@ export default function Detail() {
                   language="markdown"
                   value={content}
                   readonly={!editPassword}
-                  onChange={(value) => setContent(value || "")}
+                  onChange={(value) => setContent(value || '')}
                   showFullscreenButton={true}
                 />
               )}
@@ -308,17 +331,17 @@ export default function Detail() {
                 </div>
                 <div>
                   <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {language === "text"
-                      ? "Text"
+                    {language === 'text'
+                      ? 'Text'
                       : language.charAt(0).toUpperCase() +
-                        language.slice(1)}{" "}
+                        language.slice(1)}{' '}
                     Snippet
                   </h1>
                   <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                     <span>
-                      {new Date(
-                        pasteData?.create_time || Date.now(),
-                      ).toLocaleDateString()}
+                      {dayjs(pasteData?.create_time || Date.now()).format(
+                        'YYYY-MM-DD',
+                      )}
                     </span>
                     <span>•</span>
                     <span className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs">
@@ -326,7 +349,7 @@ export default function Detail() {
                     </span>
                     <span>•</span>
                     <span>
-                      {pasteData?.share_password ? "🔒 Protected" : "🌐 Public"}
+                      {pasteData?.share_password ? '🔒 Protected' : '🌐 Public'}
                     </span>
                   </div>
                 </div>
@@ -339,7 +362,7 @@ export default function Detail() {
                 >
                   <span className="sm:hidden">URL</span>
                   <span className="hidden sm:inline">
-                    Copy URL {pasteData?.share_password && "(without password)"}
+                    Copy URL {pasteData?.share_password && '(without password)'}
                   </span>
                 </CopyButton>
                 {editPassword && (
@@ -364,7 +387,7 @@ export default function Detail() {
                       `${origin}/raw/${id}${
                         pasteData?.share_password
                           ? `?share_password=${pasteData?.share_password}`
-                          : ""
+                          : ''
                       }`,
                     )
                   }
@@ -393,7 +416,7 @@ export default function Detail() {
             language={language}
             value={content}
             readonly={!editPassword}
-            onChange={(value) => setContent(value || "")}
+            onChange={(value) => setContent(value || '')}
             showFullscreenButton={true}
           />
         </div>

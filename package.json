@@ -27,6 +27,7 @@
     "ahooks": "^3.8.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "dayjs": "^1.11.19",
     "drizzle-kit": "^0.31.8",
     "lucide-react": "^0.378.0",
     "markdown-it": "^14.0.0",

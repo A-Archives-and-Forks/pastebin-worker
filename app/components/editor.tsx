@@ -1,29 +1,29 @@
-import Prism from "prismjs";
-import "prismjs/components/prism-bash";
-import "prismjs/components/prism-c";
-import "prismjs/components/prism-clike";
-import "prismjs/components/prism-cpp";
-import "prismjs/components/prism-css";
-import "prismjs/components/prism-go";
-import "prismjs/components/prism-java";
+import Prism from 'prismjs';
+import 'prismjs/components/prism-bash';
+import 'prismjs/components/prism-c';
+import 'prismjs/components/prism-clike';
+import 'prismjs/components/prism-cpp';
+import 'prismjs/components/prism-css';
+import 'prismjs/components/prism-go';
+import 'prismjs/components/prism-java';
 // 第二层：依赖基础语言的语言
-import "prismjs/components/prism-javascript";
-import "prismjs/components/prism-json";
-import "prismjs/components/prism-jsx";
-import "prismjs/components/prism-markdown";
+import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-json';
+import 'prismjs/components/prism-jsx';
+import 'prismjs/components/prism-markdown';
 // 第一层：基础语言
-import "prismjs/components/prism-markup";
+import 'prismjs/components/prism-markup';
 // 第三层：独立语言
-import "prismjs/components/prism-python";
-import "prismjs/components/prism-tsx";
-import "prismjs/components/prism-typescript";
+import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-tsx';
+import 'prismjs/components/prism-typescript';
 // 第四层：依赖多个语言的格式
-import "prismjs/components/prism-yaml";
-import { useEffect, useRef, useState } from "react";
+import 'prismjs/components/prism-yaml';
+import { useEffect, useRef, useState } from 'react';
 
-import { useTheme } from "../context/theme";
+import { useTheme } from '../context/theme';
 // 导入自定义样式
-import "./prism-custom.css";
+import './prism-custom.css';
 
 interface EditorProps {
   language?: string;
@@ -37,44 +37,44 @@ interface EditorProps {
 
 // Prism.js 语言映射
 const languageMap: Record<string, string> = {
-  text: "plaintext",
-  markdown: "markdown",
-  go: "go",
-  javascript: "javascript",
-  typescript: "typescript",
-  json: "json",
-  c: "c",
-  cpp: "cpp",
-  python: "python",
-  shell: "bash",
-  html: "markup",
-  xml: "markup",
-  yaml: "yaml",
-  css: "css",
-  less: "css",
-  scss: "scss",
-  golang: "go",
-  js: "javascript",
-  ts: "typescript",
-  jsx: "jsx",
-  tsx: "tsx",
-  java: "java",
-  csharp: "csharp",
-  php: "php",
-  ruby: "ruby",
-  rust: "rust",
-  sql: "sql",
-  bash: "bash",
-  sh: "bash",
+  text: 'plaintext',
+  markdown: 'markdown',
+  go: 'go',
+  javascript: 'javascript',
+  typescript: 'typescript',
+  json: 'json',
+  c: 'c',
+  cpp: 'cpp',
+  python: 'python',
+  shell: 'bash',
+  html: 'markup',
+  xml: 'markup',
+  yaml: 'yaml',
+  css: 'css',
+  less: 'css',
+  scss: 'scss',
+  golang: 'go',
+  js: 'javascript',
+  ts: 'typescript',
+  jsx: 'jsx',
+  tsx: 'tsx',
+  java: 'java',
+  csharp: 'csharp',
+  php: 'php',
+  ruby: 'ruby',
+  rust: 'rust',
+  sql: 'sql',
+  bash: 'bash',
+  sh: 'bash',
 };
 
 export default function SimpleEditor({
   value,
   onChange,
-  language = "text",
+  language = 'text',
   readonly = false,
-  height = "300px",
-  className = "",
+  height = '300px',
+  className = '',
   showFullscreenButton = false,
 }: EditorProps) {
   const { theme } = useTheme();
@@ -82,32 +82,32 @@ export default function SimpleEditor({
   const lineNumbersRef = useRef<HTMLDivElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
   const [lineCount, setLineCount] = useState(1);
-  const [highlightedCode, setHighlightedCode] = useState("");
+  const [highlightedCode, setHighlightedCode] = useState('');
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   // 获取当前主题
   const isDark =
-    theme === "dark" ||
-    (theme === "system" &&
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches);
+    theme === 'dark' ||
+    (theme === 'system' &&
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   // HTML 转义函数
   const escapeHtml = (text: string): string => {
-    const div = document.createElement("div");
+    const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
   };
 
   // 计算行数和语法高亮
   useEffect(() => {
-    const lines = value.split("\n").length;
+    const lines = value.split('\n').length;
     setLineCount(lines);
 
     // 语法高亮
-    const prismLanguage = languageMap[language] || "plaintext";
+    const prismLanguage = languageMap[language] || 'plaintext';
 
-    if (prismLanguage !== "plaintext" && Prism.languages[prismLanguage]) {
+    if (prismLanguage !== 'plaintext' && Prism.languages[prismLanguage]) {
       try {
         const highlighted = Prism.highlight(
           value,
@@ -116,7 +116,7 @@ export default function SimpleEditor({
         );
         setHighlightedCode(highlighted);
       } catch (error) {
-        console.warn("Prism highlighting failed:", error);
+        console.warn('Prism highlighting failed:', error);
         // 如果语法高亮失败，转义HTML内容
         setHighlightedCode(escapeHtml(value));
       }
@@ -139,7 +139,7 @@ export default function SimpleEditor({
 
   // 处理 Tab 键插入 4 个空格
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Tab") {
+    if (e.key === 'Tab') {
       e.preventDefault();
       const textarea = e.currentTarget;
       const start = textarea.selectionStart;
@@ -147,7 +147,7 @@ export default function SimpleEditor({
 
       // 插入 4 个空格
       const newValue =
-        value.substring(0, start) + "    " + value.substring(end);
+        value.substring(0, start) + '    ' + value.substring(end);
 
       if (onChange) {
         onChange(newValue);
@@ -171,7 +171,7 @@ export default function SimpleEditor({
     e.preventDefault();
 
     // 获取纯文本内容
-    const text = e.clipboardData.getData("text/plain");
+    const text = e.clipboardData.getData('text/plain');
 
     if (text && onChange) {
       const textarea = e.currentTarget;
@@ -197,23 +197,23 @@ export default function SimpleEditor({
   // 处理 ESC 键退出全屏
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isFullscreen) {
+      if (e.key === 'Escape' && isFullscreen) {
         setIsFullscreen(false);
       }
     };
 
     if (isFullscreen) {
-      document.addEventListener("keydown", handleKeyDown);
-      return () => document.removeEventListener("keydown", handleKeyDown);
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
     }
   }, [isFullscreen]);
 
   return (
     <div
       className={`rounded-md overflow-hidden bg-white dark:bg-gray-800 ${className} ${
-        isFullscreen ? "fixed inset-0 z-50 rounded-none" : ""
+        isFullscreen ? 'fixed inset-0 z-50 rounded-none' : ''
       }`}
-      style={{ height: isFullscreen ? "100vh" : height }}
+      style={{ height: isFullscreen ? '100vh' : height }}
     >
       {/* 工具栏 */}
       {showFullscreenButton && (
@@ -221,7 +221,7 @@ export default function SimpleEditor({
           <button
             onClick={toggleFullscreen}
             className="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-            title={isFullscreen ? "Exit Fullscreen (ESC)" : "Fullscreen"}
+            title={isFullscreen ? 'Exit Fullscreen (ESC)' : 'Fullscreen'}
           >
             {isFullscreen ? (
               <svg
@@ -257,7 +257,7 @@ export default function SimpleEditor({
       )}
       <div
         className={`flex ${
-          showFullscreenButton ? "h-[calc(100%-49px)]" : "h-full"
+          showFullscreenButton ? 'h-[calc(100%-49px)]' : 'h-full'
         }`}
       >
         {/* 行号区域 */}
@@ -266,19 +266,19 @@ export default function SimpleEditor({
           className="flex-shrink-0 bg-gray-50 dark:bg-gray-700 border-r border-gray-200 dark:border-gray-600 overflow-hidden select-none"
           style={{
             width: `${Math.max(3, lineCount.toString().length + 1)}ch`,
-            paddingLeft: "8px",
-            paddingRight: "8px",
+            paddingLeft: '8px',
+            paddingRight: '8px',
           }}
         >
           <div
             className="text-sm text-gray-500 dark:text-gray-400 font-mono pt-3 pb-3"
-            style={{ lineHeight: "1.5rem" }}
+            style={{ lineHeight: '1.5rem' }}
           >
             {Array.from({ length: lineCount }, (_, i) => (
               <div
                 key={i + 1}
                 className="text-right"
-                style={{ height: "1.5rem", lineHeight: "1.5rem" }}
+                style={{ height: '1.5rem', lineHeight: '1.5rem' }}
               >
                 {i + 1}
               </div>
@@ -293,23 +293,23 @@ export default function SimpleEditor({
             ref={highlightRef}
             className="absolute inset-0 pointer-events-none overflow-hidden"
             style={{
-              padding: "12px",
-              lineHeight: "1.5rem",
-              fontSize: "14px",
+              padding: '12px',
+              lineHeight: '1.5rem',
+              fontSize: '14px',
               fontFamily:
                 "ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace",
             }}
           >
             <pre
               className={`font-mono text-sm whitespace-pre ${
-                isDark ? "prism-dark" : "prism-light"
+                isDark ? 'prism-dark' : 'prism-light'
               }`}
               style={{
                 margin: 0,
                 padding: 0,
-                background: "transparent",
-                lineHeight: "1.5rem",
-                color: isDark ? "#e5e7eb" : "#374151",
+                background: 'transparent',
+                lineHeight: '1.5rem',
+                color: isDark ? '#e5e7eb' : '#374151',
               }}
               dangerouslySetInnerHTML={{ __html: highlightedCode }}
             />
@@ -324,16 +324,16 @@ export default function SimpleEditor({
             onScroll={handleScroll}
             onPaste={handlePaste}
             readOnly={readonly}
-            placeholder={readonly ? "" : "Write your text here..."}
-            className="w-full h-full resize-none border-0 outline-0 bg-transparent font-mono text-sm p-3 focus:ring-0 relative z-10"
+            placeholder={readonly ? '' : 'Write your text here...'}
+            className="w-full h-full resize-none border-0 outline-0 bg-transparent font-mono text-sm p-3 focus:ring-0 relative z-10 outline-none"
             style={{
-              lineHeight: "1.5rem",
+              lineHeight: '1.5rem',
               tabSize: 4,
-              color: "transparent",
-              caretColor: isDark ? "#60a5fa" : "#3b82f6",
-              whiteSpace: "pre",
-              wordWrap: "normal",
-              overflowWrap: "normal",
+              color: 'transparent',
+              caretColor: isDark ? '#60a5fa' : '#3b82f6',
+              whiteSpace: 'pre',
+              wordWrap: 'normal',
+              overflowWrap: 'normal',
             }}
             spellCheck={false}
           />

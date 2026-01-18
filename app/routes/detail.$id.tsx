@@ -1,8 +1,44 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import Detail from "@/pages/detail";
+import Detail, { type DetailLoaderData } from "@/pages/detail";
 
 export const Route = createFileRoute("/detail/$id")({
+  loader: async ({ params, location }) => {
+    const searchParams = new URLSearchParams(location.searchStr);
+    const sharePassword = searchParams.get("share_password");
+    const editPassword = searchParams.get("edit_password");
+    const query = new URLSearchParams({ id: params.id });
+    if (sharePassword) {
+      query.set("share_password", sharePassword);
+    }
+    const origin = location.url.origin;
+    const apiUrl = `${origin}/api/get?${query.toString()}`;
+    let paste: any;
+    let error: string | undefined;
+    let code: number | undefined;
+
+    try {
+      const res = await fetch(apiUrl);
+      const data = await res.json();
+      paste = data;
+      if (data?.error) {
+        error = data.error;
+        code = data.code ?? res.status;
+      }
+    } catch (err) {
+      error = err instanceof Error ? err.message : "Failed to load paste";
+      code = 500;
+    }
+
+    return {
+      paste,
+      error,
+      code,
+      sharePassword,
+      editPassword,
+      origin,
+    } as DetailLoaderData;
+  },
   head: ({ params }) => ({
     meta: [
       { title: "Shared content — PasteShare" },
@@ -35,5 +71,10 @@ export const Route = createFileRoute("/detail/$id")({
       { rel: "canonical", href: `https://as.al/detail/${params.id}` },
     ],
   }),
-  component: Detail,
+  component: DetailRoute,
 });
+
+function DetailRoute() {
+  const loaderData = Route.useLoaderData();
+  return <Detail loaderData={loaderData} />;
+}
